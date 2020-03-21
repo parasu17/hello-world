@@ -20,8 +20,15 @@ public class ExcelReadApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        ReadExcel re = new ReadExcel();
-        Map<String, List<String>> values = re.read(args[0]);
+        Map<String, List<String>> values = null;
+        int[] keys = Util.getIntArr(args[2]);
+        if("csv".equalsIgnoreCase(args[1])) {
+            ReadCsv csv = new ReadCsv();
+            values = csv.read(args[0], keys);
+        } else if("excel".equalsIgnoreCase(args[1])) {
+            ReadExcel re = new ReadExcel();
+            values = re.read(args[0]);
+        }
         logger.info("{}", values);
     }
 }

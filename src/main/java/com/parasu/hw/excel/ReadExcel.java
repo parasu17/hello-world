@@ -59,7 +59,7 @@ public class ReadExcel {
                 Cell cell = cellIterator.next();
                 String cellValue = getCellValue(cell);
                 rowValues.add(cellValue);
-                if(isIdCell(idRows, cellIndex)) {
+                if(Util.isPresent(idRows, cellIndex)) {
                     sb.append(cellValue);
                     sb.append("___");
                 }
@@ -77,14 +77,4 @@ public class ReadExcel {
         return excelValues;
     }
 
-    private boolean isIdCell(int[] idCells, int cellId) {
-        boolean b = false;
-        for(int id : idCells) {
-            if(id == cellId) {
-                b = true;
-                break;
-            }
-        }
-        return b;
-    }
 }
