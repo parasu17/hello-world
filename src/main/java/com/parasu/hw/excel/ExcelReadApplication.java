@@ -29,6 +29,7 @@ public class ExcelReadApplication implements CommandLineRunner {
             ReadExcel re = new ReadExcel();
             values = re.read(args[0]);
         }
-        logger.info("{}", values);
+
+        Util.print(values);
     }
 }

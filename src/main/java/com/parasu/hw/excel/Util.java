@@ -1,9 +1,15 @@
 package com.parasu.hw.excel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Util {
+
+    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
     public static boolean isPresent(int[] intArr, int value) {
         boolean b = false;
@@ -29,4 +35,17 @@ public class Util {
         return v;
     }
 
+    public static void print(Map<String, List<String>> values) {
+        if(values == null || values.size() == 0) {
+            logger.info("Empty map");
+            return;
+        }
+
+        values.forEach((key, list) -> {
+            StringBuilder sb = new StringBuilder();
+            list.forEach( val -> sb.append(val).append(","));
+            logger.info("key={}, value={}", key, sb);
+        });
+
+    }
 }

@@ -25,8 +25,8 @@ public class ReadCsv {
         }
         Map<String, List<String>> values = new HashMap<>();
         try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
-            String line = null;
-            List<String> cells = null;
+            String line;
+            List<String> cells;
             while( (line = br.readLine()) != null) {
                 cells = parseLine(line);
                 String key = null;
@@ -47,95 +47,49 @@ public class ReadCsv {
         return values;
     }
 
-    public List<String> parseLine(String cvsLine) {
-        return parseLine(cvsLine, DEFAULT_SEPARATOR, DEFAULT_QUOTE);
-    }
-
-    public List<String> parseLine(String cvsLine, char separators) {
-        return parseLine(cvsLine, separators, DEFAULT_QUOTE);
-    }
-
-    public List<String> parseLine(String cvsLine, char separators, char customQuote) {
-
-        List<String> result = new ArrayList<>();
-
-        //if empty, return!
-        if (cvsLine == null && cvsLine.isEmpty()) {
-            return result;
-        }
-
-        if (customQuote == ' ') {
-            customQuote = DEFAULT_QUOTE;
-        }
-
-        if (separators == ' ') {
-            separators = DEFAULT_SEPARATOR;
-        }
-
-        StringBuffer curVal = new StringBuffer();
-        boolean inQuotes = false;
-        boolean startCollectChar = false;
-        boolean doubleQuotesInColumn = false;
-
-        char[] chars = cvsLine.toCharArray();
-
-        for (char ch : chars) {
-
-            if (inQuotes) {
-                startCollectChar = true;
-                if (ch == customQuote) {
-                    inQuotes = false;
-                    doubleQuotesInColumn = false;
-                } else {
-
-                    //Fixed : allow "" in custom quote enclosed
-                    if (ch == '\"') {
-                        if (!doubleQuotesInColumn) {
-                            curVal.append(ch);
-                            doubleQuotesInColumn = true;
-                        }
-                    } else {
-                        curVal.append(ch);
-                    }
-
-                }
-            } else {
-                if (ch == customQuote) {
-
-                    inQuotes = true;
-
-                    //Fixed : allow "" in empty quote enclosed
-                    if (chars[0] != '"' && customQuote == '\"') {
-                        curVal.append('"');
-                    }
-
-                    //double quotes in column will hit this!
-                    if (startCollectChar) {
-                        curVal.append('"');
-                    }
-
-                } else if (ch == separators) {
-
-                    result.add(curVal.toString());
-
-                    curVal = new StringBuffer();
-                    startCollectChar = false;
-
-                } else if (ch == '\r') {
-                    //ignore LF characters
-                    continue;
-                } else if (ch == '\n') {
-                    //the end, break!
-                    break;
-                } else {
-                    curVal.append(ch);
-                }
+    private int indexOfChar(char[] chars, int startIndex, char ch) {
+        int index = -1;
+        for(int i = startIndex; i < chars.length ; i++) {
+            if(chars[i] == ch) {
+                index = i;
+                break;
             }
+        }
+        return index;
+    }
 
+    private List<String> parseLine(String line) {
+        char quote = DEFAULT_QUOTE;
+
+        List<String> values = new ArrayList<>();
+        char[] chars = line.toCharArray();
+
+        int endQuote;
+        int previousSep = 0;
+        String str;
+        for(int i = 0; i < chars.length ; i++) {
+            if(chars[i] == quote) {
+                endQuote = indexOfChar(chars, i + 1, quote);
+                if(endQuote != -1) {
+                    i = endQuote;
+                }
+            } else if(chars[i] == DEFAULT_SEPARATOR) {
+                str = new String(chars, previousSep, i - previousSep);
+                if(str.startsWith("\"") && str.substring(1).endsWith("\"")) {
+                    str = str.substring(1, str.length() - 1);
+                }
+                values.add(str);
+                previousSep = i + 1;
+            }
         }
 
-        result.add(curVal.toString());
+        if(chars.length > previousSep) {
+            values.add(new String(chars, previousSep, chars.length - previousSep));
+        } else if(chars.length == previousSep) {
+            values.add("");
+        }
 
-        return result;
+        return values;
     }
+
 }
